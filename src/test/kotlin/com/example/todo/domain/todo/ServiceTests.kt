@@ -2,19 +2,21 @@ package com.example.todo.domain.todo
 
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
+import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.data.domain.Pageable
 import java.time.LocalDateTime
+import javax.persistence.EntityManager
+import javax.transaction.Transactional
 
-@DataJpaTest
+@SpringBootTest
+@Transactional
 class ServiceTests @Autowired constructor(
-    val entityManager: TestEntityManager,
-    val todoRepository: TodoRepository,
+    val todoService: SimpleTodoService,
+    val entityManager: EntityManager,
 ) {
+
     @Test
     fun `findAll`() {
-        val todoService = SimpleTodoService(todoRepository)
         val completedTodo = Todo(content = "todo1", isCompleted = true, createdAt = LocalDateTime.of(2021, 11, 1, 0, 0))
         val completedTodo2 = Todo(content = "todo2", isCompleted = true, createdAt = LocalDateTime.of(2021, 11, 2, 0, 0))
         val inCompletedTodo = Todo(content = "todo3")
@@ -34,7 +36,6 @@ class ServiceTests @Autowired constructor(
 
     @Test
     fun `create`() {
-        val todoService = SimpleTodoService(todoRepository)
         val actual = todoService.create(content = "todo")
         assert(actual.content == "todo")
         assert(!actual.isCompleted)
@@ -42,7 +43,6 @@ class ServiceTests @Autowired constructor(
 
     @Test
     fun `delete`() {
-        val todoService = SimpleTodoService(todoRepository)
         val todo = Todo(content = "todo")
         entityManager.persist(todo)
         entityManager.flush()
@@ -54,7 +54,6 @@ class ServiceTests @Autowired constructor(
 
     @Test
     fun `complete`() {
-        val todoService = SimpleTodoService(todoRepository)
         val todo = Todo(content = "todo")
         entityManager.persist(todo)
         entityManager.flush()

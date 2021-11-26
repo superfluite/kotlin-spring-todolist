@@ -1,6 +1,9 @@
 package com.example.todo.application.presentation.rest
 
 
+import com.example.todo.domain.todo.Todo
+import com.example.todo.domain.todo.TodoRepository
+import org.json.JSONObject
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -17,14 +20,30 @@ class TodoTests {
     @Autowired
     private lateinit var mockMvc: MockMvc
 
+    private fun createTodo(todoContent : String) : Any {
+        mockMvc
+            .post("/api/todo/create/") { content = todoContent }
+
+        val queryParams = LinkedMultiValueMap<String, String>()
+        queryParams.add("isCompleted", "false")
+
+        val actual = mockMvc
+            .get("/api/todo/") { params = queryParams}
+            .andReturn()
+
+        return (JSONObject(actual.response.contentAsString)
+            .getJSONArray("content")[0] as JSONObject)
+            .get("id")
+    }
+
     @Test
     fun `findAll`() {
+        val todoIds = mutableListOf<Int>()
         for (i in 1..3) {
-            mockMvc
-                .post("/api/todo/create/") { content = "foo$i" }
-                .andExpect { status { isOk() } }
+            createTodo("foo$i")
+            todoIds.add(i)
         }
-        mockMvc.put("/api/todo/1/complete/").andExpect { status { isOk() } }
+        mockMvc.get("/api/todo/${todoIds[0]}/complete/")
 
         val queryParams = LinkedMultiValueMap<String, String>()
         queryParams.add("isCompleted", "false")
@@ -64,15 +83,16 @@ class TodoTests {
 
     @Test
     fun `complete`() {
-        mockMvc
-            .post("/api/todo/create/") { content = "foo" }
-            .andExpect { status { isOk() } }
-
-        mockMvc
-            .put("/api/todo/1/complete/")
-            .andExpect { status { isOk() } }
+        val todoId = createTodo("foo")
 
         val queryParams = LinkedMultiValueMap<String, String>()
+        queryParams.add("isCompleted", "false")
+
+        mockMvc
+            .put("/api/todo/$todoId/complete/")
+            .andExpect { status { isOk() } }
+
+        queryParams.clear()
         queryParams.add("isCompleted", "true")
         mockMvc
             .get("/api/todo/") { params = queryParams }
@@ -82,12 +102,10 @@ class TodoTests {
 
     @Test
     fun `delete`() {
-        mockMvc
-            .post("/api/todo/create/") { content = "foo" }
-            .andExpect { status { isOk() } }
+        val todoId = createTodo("foo")
 
         mockMvc
-            .delete("/api/todo/1/")
+            .delete("/api/todo/$todoId/")
             .andExpect { status { isOk() } }
 
         val queryParams = LinkedMultiValueMap<String, String>()

@@ -5,7 +5,6 @@ import com.example.todo.domain.todo.Todo
 import com.example.todo.domain.todo.TodoDTO
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
-import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 
 
@@ -26,7 +25,7 @@ class TodoController(private val service: SimpleTodoService) {
     }
 
     @PostMapping("/create/")
-    fun create(@RequestBody content: String) = service.create(content)
+    fun create(@RequestBody input: TodoInputDTO) = service.create(input.content)
 
     @PutMapping("/{id}/complete/")
     fun complete(@PathVariable id: Long) = service.complete(id)

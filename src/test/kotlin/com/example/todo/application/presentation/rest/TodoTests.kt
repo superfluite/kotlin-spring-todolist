@@ -1,13 +1,12 @@
 package com.example.todo.application.presentation.rest
 
 
-import com.example.todo.domain.todo.Todo
-import com.example.todo.domain.todo.TodoRepository
 import org.json.JSONObject
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import org.springframework.util.LinkedMultiValueMap
@@ -21,8 +20,13 @@ class TodoTests {
     private lateinit var mockMvc: MockMvc
 
     private fun createTodo(todoContent : String) : Any {
+        val json = """{ "content": "$todoContent" }"""
         mockMvc
-            .post("/api/todo/create/") { content = todoContent }
+            .post("/api/todo/create/") {
+                content = json
+                contentType = MediaType.APPLICATION_JSON
+            }
+            .andExpect { status { isOk() } }
 
         val queryParams = LinkedMultiValueMap<String, String>()
         queryParams.add("isCompleted", "false")
@@ -67,8 +71,12 @@ class TodoTests {
 
     @Test
     fun `create`() {
+        val json = """{ "content": "foo" }"""
         mockMvc
-            .post("/api/todo/create/") { content = "foo" }
+            .post("/api/todo/create/") {
+                content = json
+                contentType = MediaType.APPLICATION_JSON
+            }
             .andExpect { status { isOk() } }
 
         val queryParams = LinkedMultiValueMap<String, String>()

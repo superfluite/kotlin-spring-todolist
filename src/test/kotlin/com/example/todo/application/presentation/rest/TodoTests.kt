@@ -24,7 +24,7 @@ class TodoTests {
                 .post("/api/todo/create/") { content = "foo$i" }
                 .andExpect { status { isOk() } }
         }
-        mockMvc.put("/api/todo/complete/1/").andExpect { status { isOk() } }
+        mockMvc.put("/api/todo/1/complete/").andExpect { status { isOk() } }
 
         val queryParams = LinkedMultiValueMap<String, String>()
         queryParams.add("isCompleted", "false")
@@ -69,7 +69,7 @@ class TodoTests {
             .andExpect { status { isOk() } }
 
         mockMvc
-            .put("/api/todo/complete/1/")
+            .put("/api/todo/1/complete/")
             .andExpect { status { isOk() } }
 
         val queryParams = LinkedMultiValueMap<String, String>()
@@ -78,8 +78,6 @@ class TodoTests {
             .get("/api/todo/") { params = queryParams }
             .andExpect { status { isOk() } }
             .andExpect { jsonPath("\$.totalElements").value("1") }
-
-
     }
 
     @Test
@@ -89,7 +87,7 @@ class TodoTests {
             .andExpect { status { isOk() } }
 
         mockMvc
-            .delete("/api/todo/delete/1/")
+            .delete("/api/todo/1/")
             .andExpect { status { isOk() } }
 
         val queryParams = LinkedMultiValueMap<String, String>()

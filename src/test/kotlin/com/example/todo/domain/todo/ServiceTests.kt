@@ -10,45 +10,55 @@ import javax.transaction.Transactional
 @Transactional
 class ServiceTests @Autowired constructor(
     val todoService: SimpleTodoService,
+    val todoRepository: TodoRepository,
 ) {
 
     @Test
     fun `findAll`() {
-        val completedTodo = todoService.create("todo1")
-        val completedTodo2 = todoService.create("todo2")
-        val inCompletedTodo = todoService.create("todo3")
-        todoService.complete(completedTodo.id)
-        todoService.complete(completedTodo2.id)
+        val completedTodo = Todo(content = "todo1", isCompleted = true)
+        val completedTodo2 = Todo(content = "todo2", isCompleted = true)
+        val inCompletedTodo = Todo(content = "todo3")
+        todoRepository.save(completedTodo)
+        todoRepository.save(completedTodo2)
+        todoRepository.save(inCompletedTodo)
 
-        val actual = todoService.findAll(true, Pageable.ofSize(1))
+        var actual = todoService.findAll(true, Pageable.ofSize(1))
         assert(actual.count() == 1)
         assert(actual.contains(completedTodo2))
 
-        val actual2 = todoService.findAll(false, Pageable.ofSize(1))
-        assert(actual2.count() == 1)
-        assert(actual2.contains(inCompletedTodo))
+        actual = todoService.findAll(false, Pageable.ofSize(1))
+        assert(actual.count() == 1)
+        assert(actual.contains(inCompletedTodo))
     }
 
     @Test
     fun `create`() {
-        val actual = todoService.create("todo")
-        assert(actual.content == "todo")
-        assert(!actual.isCompleted)
-        val actual2 = todoService.findAll(false, Pageable.ofSize(1))
-        assert(actual2.contains(actual))
+        var actual = todoRepository.findAllByIsCompletedOrderByCreatedAtDesc(Pageable.ofSize(10), false)
+        assert(actual.content.size == 0)
+
+        todoService.create("todo")
+        actual = todoRepository.findAllByIsCompletedOrderByCreatedAtDesc(Pageable.ofSize(10), false)
+        assert(actual.content.size == 1)
+        assert(actual.content[0].content == "todo")
+        assert(!actual.content[0].isCompleted)
     }
 
     @Test
     fun `delete`() {
-        val todo = todoService.create("todo")
+        val todo = Todo(content = "todo")
+        todoRepository.save(todo)
+
+        var actual = todoRepository.findAllByIsCompletedOrderByCreatedAtDesc(Pageable.ofSize(10), false)
+        assert(actual.content.size == 1)
         todoService.delete(todo.id)
-        val actual = todoService.findAll(false, Pageable.ofSize(10))
-        assert(actual.count() == 0)
+        actual = todoRepository.findAllByIsCompletedOrderByCreatedAtDesc(Pageable.ofSize(10), false)
+        assert(actual.content.size == 0)
     }
 
     @Test
     fun `complete`() {
-        val todo = todoService.create("todo")
+        val todo = Todo(content = "todo")
+        todoRepository.save(todo)
 
         assert(!todo.isCompleted)
         todoService.complete(todo.id)

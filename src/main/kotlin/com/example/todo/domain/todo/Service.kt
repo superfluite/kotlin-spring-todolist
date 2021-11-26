@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional
 interface TodoService {
     fun findAll(isCompleted: Boolean, pageable: Pageable) : Iterable<Todo>
 
-    fun create(content: String) : Todo
+    fun create(content: String)
 
     fun delete(id: Long)
 
@@ -22,8 +22,8 @@ class SimpleTodoService(private val repository: TodoRepository) : TodoService {
         return repository.findAllByIsCompletedOrderByCreatedAtDesc(pageable, isCompleted)
     }
 
-    override fun create(content: String) : Todo {
-        return repository.save(Todo(content = content))
+    override fun create(content: String) {
+        repository.save(Todo(content = content))
     }
 
     override fun delete(id: Long) {

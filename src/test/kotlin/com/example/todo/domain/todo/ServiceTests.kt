@@ -48,10 +48,8 @@ class ServiceTests @Autowired constructor(
         val todo = Todo(content = "todo")
         todoRepository.save(todo)
 
-        var actual = todoRepository.findAllByIsCompletedOrderByCreatedAtDesc(Pageable.ofSize(10), false)
-        assert(actual.content.size == 1)
         todoService.delete(todo.id)
-        actual = todoRepository.findAllByIsCompletedOrderByCreatedAtDesc(Pageable.ofSize(10), false)
+        var actual = todoRepository.findAllByIsCompletedOrderByCreatedAtDesc(Pageable.ofSize(10), false)
         assert(actual.content.size == 0)
     }
 
@@ -60,7 +58,6 @@ class ServiceTests @Autowired constructor(
         val todo = Todo(content = "todo")
         todoRepository.save(todo)
 
-        assert(!todo.isCompleted)
         todoService.complete(todo.id)
         assert(todo.isCompleted)
     }

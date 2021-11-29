@@ -11,3 +11,11 @@ class Todo(
     var content: String,
     var isCompleted: Boolean = false,
 )
+
+
+data class TodoDTO(
+    val id: Long,
+    val createdAt: LocalDateTime,
+    val content: String,
+    val isCompleted: Boolean,
+)
